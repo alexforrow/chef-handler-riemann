@@ -8,7 +8,7 @@ module DataSift
     def initialize(options={})
       @host = options[:host]
       @port = options[:port]
-      @ttl = options[:ttl]
+      @ttl = options[:ttl] || 3600 # seems reasonable given chef runs every 30 mins by default
       @timeout = options[:timeout] || 5
     end
 
