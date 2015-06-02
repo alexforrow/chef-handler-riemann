@@ -5,7 +5,7 @@ It reports when the Chef run starts and finishes, and outputs associated events 
 
 # Usage
 
-TODO: Need to integrate into `chef_handler` cookbook for installation
+TODO: Need to integrate into `chef_handler` cookbook for installation. It will need to install `riemann-client` via `chef_gem`
 
 Editing client.rb works though:
 
