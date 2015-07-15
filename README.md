@@ -1,20 +1,25 @@
 # chef-handler-riemann
+
 Chef Handler that reports to Riemann.
 
 It reports when the Chef run starts and finishes, and outputs associated events depending on outcome.
 
 # Usage
 
-TODO: Need to integrate into `chef_handler` cookbook for installation. It will need to install `riemann-client` via `chef_gem`
+This is available as a [gem](https://rubygems.org/gems/chef-handler-riemann)
 
-Editing client.rb works though:
+Because this handler has support for start events, you can't use the `chef_handler` cookbook. Instead, it needs to be added to `client.rb`. The community [chef-client](https://github.com/opscode-cookbooks/chef-client) cookbook can help with this, as it provides easy methods for making `client.rb` load the gem and add the handler. Example usage:
 
 ```
-require '/var/chef/handlers/riemann.rb'
+# Riemann handler
+node.default['chef_client']['load_gems']['chef-handler-riemann'] = {}
 
-riemann = DataSift::RiemannHandler.new host: '192.168.122.1', port: 5555, timeout: 5, ttl: 120
-
-start_handlers << riemann
-report_handlers << riemann
-exception_handlers << rieman
+[ 'start', 'report', 'exception' ].each do |type|
+  node.default['chef_client']['config']["#{type}_handlers"] = [
+    {
+      :class => "Chef::Handler::Riemann",
+      :arguments => [ { :host => "localhost" } ]
+    }
+  ]
+end
 ```
