@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'chef-handler-riemann'
-  s.version = '0.1.3'
+  s.version = '0.1.5'
   s.platform = Gem::Platform::RUBY
   s.summary = 'Chef start, exception & reporting handler for Riemann.'
   s.description = "Provides insight into Chef status from within Riemann"

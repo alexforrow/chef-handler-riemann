@@ -4,12 +4,16 @@ require 'riemann/client'
 class Chef
   class Handler
     class Riemann < ::Chef::Handler
-      attr_writer :host, :port, :ttl, :timeout
+      attr_writer :host, :port, :ttl_running, :ttl_finished, :timeout
 
       def initialize(options={})
+        # Some versions of Chef had issues as chef-client cookbook passes it with string indicies
+        options = Mash.from_hash(options)
+
         @host = options[:host] || 'localhost'
         @port = options[:port] || 5555
-        @ttl = options[:ttl] || 3600 # seems reasonable given chef runs every 30 mins by default
+        @ttl_running = options[:ttl_running] || 600
+        @ttl_finished = options[:ttl_finished] || 3600 # seems reasonable given chef runs every 30 mins by default
         @timeout = options[:timeout] || 5
       end
 
@@ -23,7 +27,8 @@ class Chef
             riemann << {
               :service => 'process:chef-client:state',
               :state => 'running',
-              :description => "Chef run has started at #{start_time}"
+              :description => "Chef run has started at #{start_time}",
+              :ttl => @ttl_running
             }
           else
             # chef run has completed
@@ -35,19 +40,19 @@ class Chef
                 state: 'ok',
                 description: "Chef succeeded at #{end_time}",
                 metric: elapsed_time,
-                ttl: @ttl
+                ttl: @ttl_finished
               }
 
               riemann << {
                 service: "process:chef-client:updated_resources",
                 metric:  run_status.updated_resources.length,
-                ttl: @ttl
+                ttl: @ttl_finished
               }
 
               riemann << {
                 service: "process:chef-client:all_resources",
                 metric: run_status.all_resources.length,
-                ttl: @ttl
+                ttl: @ttl_finished
               }
             else
               riemann << {
@@ -55,7 +60,7 @@ class Chef
                 state: 'critical',
                 description: "Chef failed at #{end_time}: " + run_status.formatted_exception,
                 metric: elapsed_time,
-                ttl: @ttl
+                ttl: @ttl_finished
               }
             end
           end
